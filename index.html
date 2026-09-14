@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CoreBIQ Fly - Admin Workspace</title>
+
+    <!-- Material 3 Icons & Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Material 3 & Typography Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        m3: {
+                            primary: '#0B57D0',
+                            onPrimary: '#FFFFFF',
+                            primaryContainer: '#D3E3FD',
+                            onPrimaryContainer: '#041E49',
+                            secondary: '#00639B',
+                            surface: '#F8FAFD',
+                            surfaceContainer: '#E9EEF6',
+                            surfaceContainerHigh: '#E1E7EF',
+                            onSurface: '#1F1F1F',
+                            onSurfaceVariant: '#444746',
+                            outline: '#747775',
+                            geminiStart: '#EAF1FF',
+                            geminiEnd: '#F4EBFF',
+                        }
+                    },
+                    boxShadow: {
+                        'm3-elevation-1': '0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15)',
+                        'm3-elevation-2': '0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: theme('colors.m3.surface');
+            color: theme('colors.m3.onSurface');
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Material 3 Typography Scale Classes */
+        .display-lg { font-size: 57px; line-height: 64px; font-weight: 400; letter-spacing: -0.25px; }
+        .headline-lg { font-size: 32px; line-height: 40px; font-weight: 400; }
+        .title-lg { font-size: 22px; line-height: 28px; font-weight: 500; }
+        .title-md { font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; }
+        .body-lg { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0.5px; }
+        .body-md { font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
+        .label-lg { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+
+        /* M3 Navigation specific */
+        .nav-item-active {
+            background-color: theme('colors.m3.primaryContainer');
+            color: theme('colors.m3.onPrimaryContainer') !important;
+        }
+        .nav-item-active .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+            color: theme('colors.m3.onPrimaryContainer');
+        }
+
+        /* Utilities */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .submenu-transition {
+            transition: max-height 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s ease;
+            max-height: 0; opacity: 0; overflow: hidden;
+        }
+        .submenu-open {
+            max-height: 600px; opacity: 1;
+        }
+
+        .page-enter { animation: m3FadeIn 0.3s cubic-bezier(0.2, 0, 0, 1) forwards; }
+        @keyframes m3FadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Layout */
+        @media (max-width: 768px) {
+            .desktop-sidebar {
+                transform: translateX(-100%);
+                position: fixed; z-index: 60; height: 100dvh;
+                box-shadow: 0 8px 30px rgba(0,0,0,.16);
+            }
+            .desktop-sidebar.open { transform: translateX(0); }
+            #app-content { padding-bottom: 6rem !important; }
+        }
+
+        /* CoreBIQ Fly — Inter + compact professional Material 3 */
+        html, body, body * { font-family: "Inter", sans-serif !important; }
+        .material-symbols-outlined {
+            font-family: "Material Symbols Outlined" !important;
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .data-card { border: 1px solid #E1E7EF; border-radius: 20px; background: #F8FAFD; }
+        .soft-card { border: 1px solid #E1E7EF; border-radius: 20px; background: #FFFFFF; }
+        .status {
+            display:inline-flex; align-items:center; min-height:28px; padding:4px 10px;
+            border-radius:999px; font-size:12px; line-height:16px; font-weight:600;
+        }
+        .status-green { background:#E6F4EA; color:#137333; }
+        .status-blue { background:#D3E3FD; color:#174EA6; }
+        .status-orange { background:#FEF7E0; color:#B06000; }
+        .status-red { background:#FCE8E6; color:#B3261E; }
+        .status-gray { background:#E9EEF6; color:#444746; }
+
+        .metric-number { font-size:30px; line-height:36px; font-weight:600; letter-spacing:-.45px; }
+        .compact-table { min-width:720px; }
+        .mobile-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+        .module-icon {
+            width:42px; height:42px; min-width:42px; border-radius:13px;
+            display:flex; align-items:center; justify-content:center;
+            background:#D3E3FD; color:#041E49;
+        }
+        .module-icon .material-symbols-outlined { font-size:22px; }
+
+        .section-kicker {
+            font-size:12px; line-height:16px; font-weight:600;
+            letter-spacing:.07em; text-transform:uppercase; color:#444746;
+        }
+
+        /* Sidebar: no excessive blank vertical gaps */
+        #nav-container { padding-bottom:16px; }
+        #nav-container > div { margin:0 !important; }
+        #nav-container .section-kicker { padding-top:13px; padding-bottom:5px; }
+        .nav-item, [data-submenu] {
+            min-height:46px !important;
+            margin:0 !important;
+        }
+        .nav-item {
+            padding-top:10px !important;
+            padding-bottom:10px !important;
+        }
+        [data-submenu] {
+            padding-top:10px !important;
+            padding-bottom:10px !important;
+        }
+        .nav-item .label-lg,
+        [data-submenu] .label-lg {
+            font-size:14px;
+            line-height:20px;
+            font-weight:600;
+        }
+        .nav-item .material-symbols-outlined,
+        [data-submenu] .material-symbols-outlined {
+            font-size:23px;
+        }
+        .submenu-transition {
+            padding-top:0 !important;
+            padding-bottom:0 !important;
+        }
+        .submenu-transition .nav-item {
+            min-height:40px !important;
+            padding-top:7px !important;
+            padding-bottom:7px !important;
+        }
+
+        /* Light splash */
+        #flySplash {
+            background:#F8FAFD;
+        }
+        .fly-loader { animation: flyLoad 1.15s ease-in-out infinite; transform-origin:left center; }
+        @keyframes flyLoad {
+            0% { transform:translateX(-100%) scaleX(.55); opacity:.55; }
+            50% { transform:translateX(55%) scaleX(1.1); opacity:1; }
+            100% { transform:translateX(190%) scaleX(.55); opacity:.55; }
+        }
+        #flySplash.fly-hide { opacity:0; pointer-events:none; transition:opacity .28s ease; }
+
+        @media (max-width: 768px) {
+            .desktop-sidebar {
+                width:min(88vw, 360px);
+                box-shadow:0 8px 30px rgba(0,0,0,.16);
+            }
+
+            /* Slightly larger, still disciplined mobile Inter scale */
+            .display-lg { font-size:30px; line-height:36px; }
+            .headline-lg { font-size:22px; line-height:29px; font-weight:500; }
+            .title-lg { font-size:19px; line-height:25px; font-weight:600; }
+            .title-md { font-size:15px; line-height:21px; font-weight:600; }
+            .body-lg { font-size:15px; line-height:22px; }
+            .body-md { font-size:14px; line-height:20px; }
+            .label-lg { font-size:14px; line-height:20px; font-weight:500; }
+            .metric-number { font-size:27px; line-height:33px; }
+
+            .data-card { border-radius:18px; padding:14px !important; }
+            .soft-card { border-radius:18px; }
+            .module-icon { width:40px; height:40px; min-width:40px; border-radius:12px; }
+
+            /* Sidebar mobile rows */
+            #nav-container { padding-left:10px !important; padding-right:10px !important; }
+            #nav-container .section-kicker {
+                font-size:12px;
+                line-height:16px;
+                padding:14px 12px 5px !important;
+            }
+            .nav-item, [data-submenu] {
+                min-height:48px !important;
+                padding:11px 12px !important;
+            }
+            .nav-item .label-lg,
+            [data-submenu] .label-lg {
+                font-size:15px !important;
+                line-height:21px !important;
+                font-weight:600;
+            }
+            .nav-item .material-symbols-outlined,
+            [data-submenu] .material-symbols-outlined {
+                font-size:24px;
+            }
+            .submenu-transition {
+                padding-left:44px !important;
+                padding-right:4px !important;
+            }
+            .submenu-transition .nav-item {
+                min-height:40px !important;
+                padding:8px 8px !important;
+                font-size:14px !important;
+            }
+
+            #app-content {
+                padding:14px !important;
+                padding-bottom:96px !important;
+            }
+            header {
+                height:60px !important;
+                padding-left:16px !important;
+                padding-right:14px !important;
+            }
+            header .title-lg { font-size:20px !important; }
+            header .material-symbols-outlined { font-size:24px; }
+
+            .mobile-nav-item {
+                width:20% !important;
+                min-width:58px;
+            }
+            .mobile-nav-item > div {
+                width:52px !important;
+                height:30px !important;
+                margin-bottom:3px !important;
+            }
+            .mobile-nav-item .material-symbols-outlined { font-size:24px; }
+            .mobile-nav-item .label-lg {
+                font-size:12px !important;
+                line-height:17px !important;
+                font-weight:500;
+            }
+            nav.md\\:hidden {
+                height:76px !important;
+                padding-bottom:env(safe-area-inset-bottom) !important;
+            }
+
+            /* Keep dashboard rows visually tight */
+            .page-enter.space-y-6 { row-gap:14px !important; }
+            .grid { row-gap:12px; }
+        }
+
+        @media (max-width: 380px) {
+            .headline-lg { font-size:21px; line-height:28px; }
+            .title-lg { font-size:18px; line-height:24px; }
+            .body-md { font-size:13.5px; line-height:19px; }
+            .label-lg { font-size:13.5px; line-height:19px; }
+            .metric-number { font-size:25px; line-height:31px; }
+            .nav-item .label-lg,
+            [data-submenu] .label-lg { font-size:14px !important; }
+        }
+    </style>
+    <link rel="stylesheet" href="css/app.css">
+<style>
+#authGate{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:#F8FAFD;visibility:hidden;opacity:0;transition:opacity .2s ease,visibility .2s ease;padding:24px}
+#authGate.show{visibility:visible;opacity:1}
+.auth-gate-card{width:min(100%,420px);padding:32px;border:1px solid #E1E7EF;border-radius:28px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08);text-align:center;color:#444746;font:500 14px/20px Inter,sans-serif}
+.auth-gate-logo{width:64px;height:64px;margin:0 auto 18px}.auth-gate-logo img{width:100%;height:100%;object-fit:contain}.auth-gate-card h2{font:600 24px/32px Inter,sans-serif;color:#1F1F1F;margin:0 0 8px}.auth-gate-card p{margin:0}.auth-gate-card code{font-size:12px}
+</style>
+</head>
+
+<body class="flex h-screen overflow-hidden font-sans relative">
+    <div id="authGate" aria-live="polite"><div class="auth-gate-card"><div class="auth-gate-logo"><img src="assets/logo-mark.png" alt="CoreBIQ Fly"></div><div>Checking workspace access…</div></div></div>
+    <!-- Light CoreBIQ Fly Splash -->
+    <div id="flySplash" class="fixed inset-0 z-[100] bg-[#F8FAFD] flex items-center justify-center">
+        <div class="text-center px-6">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-[28px] bg-[#D3E3FD] flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[#0B57D0] text-[48px] sm:text-[56px]">flight_takeoff</span>
+            </div>
+            <div class="mt-5 text-[26px] sm:text-[30px] leading-9 font-semibold tracking-[-0.5px] text-[#1F1F1F]">CoreBIQ Fly</div>
+            <div class="mt-1 text-[13px] sm:text-[14px] leading-5 font-medium text-[#444746]">Travel &amp; Tourism Operations</div>
+            <div class="mt-7 w-32 h-1.5 mx-auto rounded-full bg-[#E1E7EF] overflow-hidden">
+                <div class="fly-loader h-full w-1/2 rounded-full bg-[#0B57D0]"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
+
+    <aside id="sidebar" class="desktop-sidebar w-[300px] bg-m3-surfaceContainer border-r border-m3-surfaceContainerHigh h-full flex flex-col transition-transform duration-300 ease-in-out md:rounded-r-2xl z-60">
+        <div class="h-[72px] flex items-center px-6 shrink-0">
+            <span class="material-symbols-outlined text-m3-primary text-3xl mr-3">flight_takeoff</span>
+            <div>
+                <h1 class="title-lg text-m3-onSurface">CoreBIQ Fly</h1>
+                <p class="body-md text-m3-onSurfaceVariant">Travel Operations</p>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto no-scrollbar px-3 space-y-0 pb-4" id="nav-container"></div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-m3-surface w-full relative">
+        <header class="h-[64px] flex-shrink-0 flex items-center justify-between px-4 sm:px-6 bg-m3-surface/90 backdrop-blur-md sticky top-0 z-20">
+            <div class="flex items-center gap-3 min-w-0">
+                <h2 id="page-title" class="title-lg text-m3-onSurface truncate">Overview</h2>
+            </div>
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button class="w-10 h-10 rounded-full hover:bg-m3-surfaceContainerHigh text-m3-onSurfaceVariant transition-colors flex items-center justify-center" title="Search">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <div class="w-10 h-10 rounded-full bg-m3-primaryContainer text-m3-onPrimaryContainer flex items-center justify-center title-md cursor-pointer ml-1 sm:ml-2">AD</div>
+            </div>
+        </header>
+
+        <div id="app-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar relative w-full max-w-[1440px] mx-auto"></div>
+    </main>
+
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-m3-surfaceContainer h-[80px] z-50 px-2 shadow-m3-elevation-2 flex items-center justify-around pb-safe">
+        <a href="/" data-link class="mobile-nav-item flex flex-col items-center justify-center w-16 h-full text-m3-onSurfaceVariant hover:text-m3-primary">
+            <div class="w-16 h-8 rounded-full flex items-center justify-center mb-1 transition-colors"><span class="material-symbols-outlined">home</span></div>
+            <span class="label-lg text-[12px]">Home</span>
+        </a>
+        <a href="/bookings" data-link class="mobile-nav-item flex flex-col items-center justify-center w-16 h-full text-m3-onSurfaceVariant hover:text-m3-primary">
+            <div class="w-16 h-8 rounded-full flex items-center justify-center mb-1 transition-colors"><span class="material-symbols-outlined">book_online</span></div>
+            <span class="label-lg text-[12px]">Bookings</span>
+        </a>
+        <a href="/crm/customers" data-link class="mobile-nav-item flex flex-col items-center justify-center w-16 h-full text-m3-onSurfaceVariant hover:text-m3-primary">
+            <div class="w-16 h-8 rounded-full flex items-center justify-center mb-1 transition-colors"><span class="material-symbols-outlined">group</span></div>
+            <span class="label-lg text-[12px]">CRM</span>
+        </a>
+        <a href="/operations" data-link class="mobile-nav-item flex flex-col items-center justify-center w-16 h-full text-m3-onSurfaceVariant hover:text-m3-primary">
+            <div class="w-16 h-8 rounded-full flex items-center justify-center mb-1 transition-colors"><span class="material-symbols-outlined">task_alt</span></div>
+            <span class="label-lg text-[12px]">Ops</span>
+        </a>
+        <button id="mobileMoreBtn" class="mobile-nav-item flex flex-col items-center justify-center w-16 h-full text-m3-onSurfaceVariant hover:text-m3-primary">
+            <div class="w-16 h-8 rounded-full flex items-center justify-center mb-1 transition-colors"><span class="material-symbols-outlined">more_horiz</span></div>
+            <span class="label-lg text-[12px]">More</span>
+        </button>
+    </nav>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+<script src="firebase/firebase-config.js"></script>
+<script src="firebase/firebase-init.js"></script>
+<script src="firebase/profile.js"></script>
+<script src="firebase/auth-guard.js"></script>
+
+<script src="js/data.js"></script>
+<script src="js/components.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="pages/dashboard.js"></script>
+<script src="pages/crm.js"></script>
+<script src="pages/products.js"></script>
+<script src="pages/bookings.js"></script>
+<script src="pages/partners.js"></script>
+<script src="pages/finance.js"></script>
+<script src="pages/engagement.js"></script>
+<script src="pages/admin.js"></script>
+<script src="pages/admin-users.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

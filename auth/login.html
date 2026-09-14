@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Sign in — CoreBIQ Fly</title>
+  <link rel="icon" type="image/png" href="../assets/favicon-32.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+  <style>
+    :root{--primary:#0B57D0;--surface:#F8FAFD;--container:#D3E3FD;--text:#1F1F1F;--muted:#444746;--outline:#747775}
+    *{box-sizing:border-box;font-family:Inter,sans-serif}
+    body{margin:0;min-height:100dvh;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;padding:24px}
+    .shell{width:min(100%,1040px);min-height:620px;background:#fff;border:1px solid #E1E7EF;border-radius:32px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;box-shadow:0 2px 10px #00000014}
+    .brand{padding:56px;background:linear-gradient(145deg,#EAF1FF,#F4EBFF);display:flex;flex-direction:column;justify-content:center}
+    .logo{width:76px;height:76px;object-fit:contain;margin-bottom:24px}.brand h1{font-size:36px;line-height:44px;font-weight:600;margin:0 0 10px}.brand p{font-size:16px;line-height:24px;color:var(--muted);max-width:390px;margin:0}.form{padding:56px;display:flex;align-items:center}.inner{width:100%;max-width:420px;margin:auto}.inner h2{font-size:28px;line-height:36px;margin:0 0 8px;font-weight:600}.sub{font-size:14px;line-height:20px;color:var(--muted);margin-bottom:28px}.field{margin-bottom:16px}.field label{display:block;font-size:13px;font-weight:500;margin-bottom:7px}.field input{width:100%;height:52px;border:1px solid var(--outline);border-radius:14px;padding:0 15px;font-size:15px;outline:none;background:#fff}.field input:focus{border:2px solid var(--primary);padding:0 14px}.password{position:relative}.password button{position:absolute;right:7px;top:6px;width:40px;height:40px;border:0;background:transparent;border-radius:50%;cursor:pointer}.row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 22px;font-size:13px}.remember{display:flex;gap:8px;align-items:center;color:var(--muted)}.link{color:var(--primary);cursor:pointer}.btn{width:100%;height:48px;border:0;border-radius:24px;background:var(--primary);color:#fff;font-size:14px;font-weight:600;cursor:pointer}.btn:disabled{opacity:.55;cursor:not-allowed}.error{display:none;background:#FDECEC;color:#9B1C1C;border-radius:12px;padding:12px;font-size:13px;line-height:18px;margin-bottom:14px}.error.show{display:block}.foot{font-size:12px;color:#747775;text-align:center;margin-top:22px}.loading{display:none}.loading.show{display:inline-block}.setup{margin-top:20px;padding:12px;border-radius:12px;background:#F1F4F8;color:var(--muted);font-size:12px;line-height:18px}.setup code{font-size:11px}
+    @media(max-width:760px){body{padding:0;align-items:stretch}.shell{border:0;border-radius:0;display:block;min-height:100dvh}.brand{min-height:260px;padding:32px 24px}.brand h1{font-size:28px;line-height:36px}.logo{width:60px;height:60px;margin-bottom:16px}.form{padding:32px 24px}.inner h2{font-size:24px;line-height:32px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="brand">
+      <img class="logo" src="../assets/logo-mark.png" alt="CoreBIQ Fly">
+      <h1>CoreBIQ Fly</h1><p>Travel &amp; Tourism Operations Platform</p>
+    </section>
+    <section class="form"><div class="inner">
+      <h2>Welcome back</h2><div class="sub">Sign in to your CoreBIQ Fly workspace.</div>
+      <div id="error" class="error"></div>
+      <form id="loginForm">
+        <div class="field"><label for="email">Work email</label><input id="email" type="email" autocomplete="username" required placeholder="name@company.com"></div>
+        <div class="field"><label for="password">Password</label><div class="password"><input id="password" type="password" autocomplete="current-password" required placeholder="Enter password"><button type="button" id="togglePassword" aria-label="Show password"><span class="material-symbols-outlined">visibility</span></button></div></div>
+        <div class="row"><label class="remember"><input id="remember" type="checkbox" checked> Remember me</label><span class="link" id="forgot">Forgot password?</span></div>
+        <button class="btn" id="submit" type="submit">Sign in <span class="loading" id="loading">…</span></button>
+      </form>
+      <div class="setup">Firebase is required for real authentication. Configure <code>firebase/firebase-config.js</code> and deploy on Firebase Hosting.</div>
+      <div class="foot">Secure CoreBIQ Fly workspace</div>
+    </div></section>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../firebase/firebase-init.js"></script>
+  <script>
+    (function(){
+      function ready(fn){ if(window.firebase){fn();} else window.addEventListener('corebiq:firebase-ready',fn); }
+      var form=document.getElementById('loginForm'), err=document.getElementById('error'), submit=document.getElementById('submit'), load=document.getElementById('loading');
+      function message(t){err.textContent=t;err.classList.add('show')}
+      document.getElementById('togglePassword').onclick=function(){var p=document.getElementById('password');p.type=p.type==='password'?'text':'password'};
+      document.getElementById('forgot').onclick=async function(){
+        var email=document.getElementById('email').value.trim(); if(!email)return message('Enter your work email first.');
+        try{await CoreBIQ.auth.sendPasswordResetEmail(email); message('Password reset instructions have been sent if the account exists.');}catch(e){message('Unable to send the reset email. Check the email address and Firebase setup.');}
+      };
+      form.onsubmit=async function(e){e.preventDefault();err.classList.remove('show');if(!CoreBIQ.auth)return message('Firebase is not configured yet.');submit.disabled=true;load.classList.add('show');
+        try{await CoreBIQ.auth.setPersistence(document.getElementById('remember').checked?firebase.auth.Auth.Persistence.LOCAL:firebase.auth.Auth.Persistence.SESSION);await CoreBIQ.auth.signInWithEmailAndPassword(document.getElementById('email').value.trim(),document.getElementById('password').value);location.replace('../index.html');}
+        catch(e){message(e.code==='auth/invalid-credential'?'Invalid email or password.':e.message||'Sign in failed.');submit.disabled=false;load.classList.remove('show');}
+      };
+    })();
+  </script>
+</body></html>
